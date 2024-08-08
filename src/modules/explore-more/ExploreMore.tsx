@@ -10,7 +10,6 @@ import { FreeMode } from 'swiper/modules';
 import { Card } from '../cards/Card';
 import { useMediaQuery } from 'react-responsive';
 import { useNotification, useResponsiveValues } from '../../hooks';
-import { cardContext, resourceCards } from '../../helpers';
 import { CardType, getCards } from '../../api/cards';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { actions as cardsActions } from '../../store/reducers/cardsReducer';
@@ -21,13 +20,13 @@ interface Props {
   isNoMargin?: boolean;
 }
 
-// ADD TYPES LATER
 export const ExploreMore: React.FC<Props> = ({ type, isNoMargin }) => {
   const { cards } = useAppSelector((state) => state.cards);
-  const dispatch = useAppDispatch();
 
+  const dispatch = useAppDispatch();
   const { getResponsiveValue } = useResponsiveValues();
   const { addNotification } = useNotification();
+  
   const isDesktop = useMediaQuery({ minWidth: 1024 });
 
   const cardSettings = {
@@ -35,13 +34,13 @@ export const ExploreMore: React.FC<Props> = ({ type, isNoMargin }) => {
     hasButton: true,
   };
 
+  // State
+
   const setCards = (value: CardType[]) => {
     dispatch(cardsActions.setCards(value));
   };
 
-  const addCards = (values: CardType[]) => {
-    dispatch(cardsActions.addCards(values));
-  };
+  // API
 
   const fetchCards = async (page: number, size?: number) => {
     try {
@@ -53,13 +52,14 @@ export const ExploreMore: React.FC<Props> = ({ type, isNoMargin }) => {
     }
   };
 
+  // Lifecycle methods
+
   useEffect(() => {
     const handleCards = async () => {
       const items = (await getCards(type)).data.totalElements;
 
       await fetchCards(0);
 
-      // for now
       if (type === 'resources') {
         fetchCards(0, items);
       }

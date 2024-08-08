@@ -19,10 +19,6 @@ const AuthPage = lazy(() => import('./modules/auth/AuthPage.tsx'));
 
 const Home = lazy(() => import('./modules/home/Home.tsx'));
 
-interface Props {
-  title: string;
-}
-
 const CardsGrid = lazy(() => import('./modules/cards/CardsGrid.tsx'));
 
 const ResourcesPage = lazy(
@@ -42,39 +38,42 @@ import { getProfile } from './api/auth.ts';
 import { useNotification } from './hooks.ts';
 import { getLocalWithExpiry, setLocalWithExpiry } from './helpers.ts';
 
-{
-  /* <div style="max-width:854px"><div style="position:relative;height:0;padding-bottom:56.25%"><iframe src="https://embed.ted.com/talks/lang/en/jakob_christensen_dalsgaard_these_animals_can_hear_everything" width="854" height="480" style="position:absolute;left:0;top:0;width:100%;height:100%" frameborder="0" scrolling="no" allowfullscreen></iframe></div></div> */
-}
-
 /*
+
+  Checked components:
+
+  - AuthPage
+  - Explore More
+  - Flashcard (add anki)
+  - Footer
+  - Home
+  - Loader
+  - Menu
+  - NavBar
+  - NotFound
+  - Notification
+  - Profile
+  - ResourcesPage
+  - 
+
+  To check:
+
+  - Card
+  - CardPage
+  - CardsGrid
 
   TO DO:
 
-  * Add password update +
-  * Connect video +
-  * Connect resources +
-  * Add image update +
-  * Pagination +
-  * Connect grammar +
-  * Do search +
-  * Image height on cards +
-  * Remove "Show more" button when all items were loaded +
-  * Fetch all resources +
-  * Add back-end to cubes +
-
   
-  * Connect auth ~
-  * Add pop-up notifications ~
-  * Add a favicon ~
+  * Add anki ~
   
-  * Add anki
-  * Handle article page - To check
-  * Set up related topics - To check
+  * Change links to navigate for smoother look
+  * "How do self-driving cards "see"" card not working properly
+  * Explore more on mobile
   * Add logic for adding / removing liked - 401
 
   * Return an error when user already exists
   
-  * Add skeleton loading to the cards
   * Name and email not showing
   
 */
@@ -83,11 +82,11 @@ function App() {
   const { user, notification } = useAppSelector((state) => state.user);
   const { title, type } = notification;
 
-  const { pathname } = useLocation();
-  const isMobile = useMediaQuery({ maxWidth: 639 });
-
   const dispatch = useAppDispatch();
   const { addNotification } = useNotification();
+
+  const isMobile = useMediaQuery({ maxWidth: 639 });
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   const mainCardsPages = ['Grammar', 'Video'];

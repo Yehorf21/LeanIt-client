@@ -3,7 +3,7 @@ import { RefObject, useEffect, useRef, useState } from 'react';
 
 import cn from 'classnames';
 import { Menu } from '../menu/Menu';
-import { cardContext, generateSlug, profileImages } from '../../helpers';
+import { generateSlug, profilePopUp } from '../../helpers';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   emptyUser,
@@ -12,6 +12,8 @@ import {
 import { CardType, SearchCardType, searchCards } from '../../api/cards';
 import { Circles } from 'react-loader-spinner';
 import { useNotification } from '../../hooks';
+import { actions as cardsActions } from '../../store/reducers/cardsReducer';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchCards {
   cards: SearchCardType[];
@@ -20,46 +22,27 @@ interface SearchCards {
 
 export const NavBar = () => {
   const { user } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
-  const { addNotification } = useNotification();
-
   const [input, setInput] = useState('');
-
-  // Search cards
   const [searchValues, setSearchValues] = useState<SearchCards>({
     cards: [],
     loading: false,
   });
-
-  const { cards, loading } = searchValues;
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchAnimationShown, setSearchAnimationShown] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const { addNotification } = useNotification();
+  const navigate = useNavigate();
+
+  const { cards, loading } = searchValues;
 
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const isMobile = useMediaQuery({ maxWidth: 639 });
 
   const loaderSize = isMobile ? 24 : 32;
   const pages = ['grammar', 'video', 'resources'];
-  const profilePopUp = [
-    {
-      icon: 'user',
-      title: 'My Profile',
-      href: '/profile',
-    },
-    {
-      icon: 'like',
-      title: 'Liked',
-      href: '/liked',
-    },
-    {
-      icon: 'post-filled',
-      title: 'Posted',
-      href: '/posted',
-    },
-  ];
 
   const refSearchInput: RefObject<HTMLInputElement> = useRef(null);
   const refSearchResult: RefObject<HTMLInputElement> = useRef(null);
@@ -68,7 +51,33 @@ export const NavBar = () => {
 
   const handleSearch = () => setIsSearchOpen(!isSearchOpen);
 
+  // State
+
+  const setPickedCard = (value: CardType) => {
+    dispatch(cardsActions.addPickedCard(value));
+  };
+
+  // Search login
+
+  const handleLink = (card: SearchCardType) => {
+    setIsSearchOpen(false);
+    setInput('');
+
+    if (card.type === 'resources') {
+      setPickedCard(card);
+
+      navigate('/resources');
+      return;
+    }
+
+    navigate(`/${card.type}/${generateSlug(card.title)}`);
+  };
+  
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (isMobile) {
+      return;
+    }
+
     if (!refSearchResult.current?.contains(e.relatedTarget)) {
       setIsSearchOpen(false);
       setInput('');
@@ -87,6 +96,8 @@ export const NavBar = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('logged-in-notification');
   };
+
+  // Lifecycle methods
 
   useEffect(() => {
     const handleScrolling = () => {
@@ -119,17 +130,6 @@ export const NavBar = () => {
       handleSearchCards();
     }
   }, [input]);
-
-  // useEffect(() => {
-  //   const matchingCards = cardContext.filter((card) =>
-  //     card.title.toLowerCase().includes(input.toLowerCase())
-  //   );
-
-  //   setSearchValues((values) => ({
-  //     ...values,
-  //     cards: matchingCards.slice(0, 3),
-  //   }));
-  // }, [input]);
 
   return (
     <div className="">
@@ -217,8 +217,8 @@ export const NavBar = () => {
                   >
                     {cards.map((card, i) => (
                       <>
-                        <a
-                          href={`/${card.type}/${generateSlug(card.title)}`}
+                        <button
+                          onClick={() => handleLink(card)}
                           className="p-4 sm:p-6 lg:p-10 flex gap-6 sm:gap-8 lg:gap-16 h-fit w-[100%] hover:bg-additional-light rounded-[16px]"
                         >
                           <img
@@ -230,7 +230,7 @@ export const NavBar = () => {
                           <p className="font-main font-semibold text-14 sm:text-16 text-primary">
                             {card.title}
                           </p>
-                        </a>
+                        </button>
 
                         {i !== cards.length - 1 && (
                           <hr className="h-1 w-[90%] bg-additional" />
@@ -265,9 +265,7 @@ export const NavBar = () => {
                     />
 
                     {isProfileOpen && (
-                      <article
-                        className="profile-images absolute right-0 top-[100px] h-fit min-w-[503px] z-50 flex flex-col gap-8 rounded-[24px] bg-additional p-10"
-                      >
+                      <article className="profile-images absolute right-0 top-[100px] h-fit min-w-[503px] z-50 flex flex-col gap-8 rounded-[24px] bg-additional p-10">
                         {profilePopUp.map((link) => (
                           <a
                             href={link.href}

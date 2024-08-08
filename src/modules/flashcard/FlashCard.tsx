@@ -1,7 +1,8 @@
 import cn from 'classnames';
 
 import { useState } from 'react';
-import { AnkiCard } from '../../api/cards';
+import { AnkiCard, postAnkiCard } from '../../api/cards';
+import { useNotification } from '../../hooks';
 
 interface Props {
   card: AnkiCard;
@@ -10,9 +11,19 @@ interface Props {
 
 export const FlashCard: React.FC<Props> = ({ card, backgroundColor }) => {
   const [isStarred, setIsStarred] = useState(false);
-  const { imageUrl, front, back } = card;
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const { addNotification } = useNotification();
+  const { imageUrl, front, back, id } = card;
 
-  const handleStar = () => setIsStarred(!isStarred);
+  const handleAnki = async () => {
+    try {
+      await postAnkiCard(id);
+      setIsStarred(true);
+    } catch(e) {
+      addNotification(e.response.data.message, 'Error');
+      setIsStarred(false);
+    }
+  };
 
   return (
     <article
@@ -22,15 +33,21 @@ export const FlashCard: React.FC<Props> = ({ card, backgroundColor }) => {
       }}
     >
       <div className="relative">
-        <img
-          className="h-[43%] w-[100%] object-cover rounded-[16px]"
-          src={imageUrl}
-          alt="card-image"
-        />
+        <div className={cn('h-[150px] lg:h-[200px] w-[100%]', {
+          'skeleton-card-image': !isImageLoaded,
+        })}>
+          <img
+            className="h-[100%] w-[100%] object-cover rounded-[16px]"
+            src={imageUrl}
+            alt="card-image"
+            loading="lazy"
+            onLoad={() => setIsImageLoaded(true)}
+          />
+        </div>
 
         <button
           className="absolute flex justify-center items-center h-10 w-10 top-6 right-6 bg-white rounded-full"
-          onClick={handleStar}
+          onClick={handleAnki}
         >
           <div
             className={cn('star h-6 w-6 bg-no-repeat bg-contain z-20', {

@@ -1,22 +1,6 @@
+import { pageCardContext } from "../../helpers";
+
 export const Pages = () => {
-  const pageCardContext = [
-    {
-      page: 'grammar',
-      title:
-        'What the heck is gerund and why are there “though”, “through”, and “thorough”?',
-      text: 'Yep, the English grammar is one piece of art. If you ever had any issues with it or just want to deepen your knowledge, well, this section is all set for you, learner.',
-    },
-    {
-      page: 'video',
-      title: `Y'know, I think 'm pretty good at English, but when it comes to speaking, I feel like a flop.`,
-      text: `Friend... not, learner, in this section you can practice both your listening and speaking. “It's just videos tho”. Hey, check first, critisize later!`,
-    },
-    {
-      page: 'resources',
-      title: `Just when I think I've got English down, I hit another weird rule. Where's the cheat sheet for this?`,
-      text: `We've got all the 'good good's' here: links to articles, videos, guides, books, and more. It might seem a lot, but take a peek—you'll find something useful.`,
-    },
-  ];
   return (
     <section id="pages" className="padding margin-top relative pages-shape">
       <div className="flex flex-col gap-10 sm:gap-[60px] lg:gap-20">

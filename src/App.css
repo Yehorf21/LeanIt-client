@@ -101,7 +101,6 @@
   left: 0;
   right: 0;
 
-  /* width: 100%; */
   background-color: #FDF00E;
   height: 726px;
 
@@ -245,13 +244,14 @@
   color: #1D2A57 !important;
   font-family: 'Paytone One' !important;
   font-size: 24px !important;
+  border-radius: 16px !important;
 }
 
 /* skeleton */
 
 .skeleton-card-image {
   z-index: 100;
-  animation: skeleton-loading 1s linear infinite;
+  animation: skeleton-loading 3s linear infinite;
   height: 43%;
   width: 100%;
   border-radius: 24px;

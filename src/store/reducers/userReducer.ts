@@ -2,14 +2,6 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { SearchCardType } from '../../api/cards';
 import { LikedArticle } from '../../api/auth';
 
-// export interface Post {
-//   id: number;
-//   title: string;
-//   descrtiption: string;
-//   imageUrl: string;
-//   href: string;
-// }
-
 export interface User {
   id: number;
   email: string;

@@ -17,9 +17,10 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
   const [maxPages, setMaxPages] = useState(0);
   const { cards } = useAppSelector((state) => state.cards);
   const { liked } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
 
+  const dispatch = useAppDispatch();
   const { addNotification } = useNotification();
+
   const navigate = useNavigate();
 
   const cardSettings = {
@@ -48,7 +49,7 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
 
   const handleNumberOfPages = () => setNumberOfPages(numberOfPages + 1);
 
-  // Routes
+  // Navigation
 
   const handleGoBack = () => {
     navigate(-1);
@@ -105,11 +106,6 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
 
     fetchMaxPages();
   }, [title]);
-
-  // TO BE REMOVED WHEN THE DATABASE IS CONNECTED
-  // useEffect(() => {
-  //   setCards(cardContext);
-  // }, []);
 
   const shownCards = useMemo(() => {
     return title !== 'Liked' ? cards : liked;

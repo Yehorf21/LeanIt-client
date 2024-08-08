@@ -15,7 +15,6 @@ import { EffectCards } from 'swiper/modules';
 import { useEffect, useMemo, useState } from 'react';
 import { cardContext, generateSlug, ungenerateSlug } from '../../helpers';
 import { FlashCard } from '../flashcard/FlashCard';
-import { useMediaQuery } from 'react-responsive';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { LikedArticle, postLiked, removeLiked } from '../../api/auth';
 import { useNotification } from '../../hooks';
@@ -128,7 +127,7 @@ export const CardPage: React.FC<Props> = ({ type }) => {
 
   return (
     <section className="padding pt-10 lg:pt-20 pb-[100px] flex flex-col gap-8 lg:gap-[53px] min-h-[70vh]">
-      <div className="flex flex-col justify-center lg:justify-normal lg:items-center lg:flex-row gap-2 lg:gap-4">
+      <div className="flex flex-col justify-center lg:justify-normal lg:flex-row gap-2 lg:gap-4">
         <button
           className="arrow-left bg-no-repeat bg-contain h-4 sm:h-8 w-4 sm:w-8"
           onClick={handleGoBack}

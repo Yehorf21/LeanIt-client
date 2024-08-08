@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import cn from 'classnames';
 import { useMediaQuery } from 'react-responsive';
-import { sendAuth, updateImage } from '../../api/auth';
+import { sendAuth } from '../../api/auth';
 import { Circles } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch } from '../../store/hooks';
 import {
   User,
   actions as userActions,
 } from '../../store/reducers/userReducer.ts';
 import { useNotification } from '../../hooks.ts';
-import { setLocalWithExpiry } from '../../helpers.ts';
+import { authText, setLocalWithExpiry } from '../../helpers.ts';
 
 interface Props {
   type: string;
@@ -29,32 +29,34 @@ const emptyInput = {
 };
 
 export const AuthPage: React.FC<Props> = ({ type }) => {
-  const { notification } = useAppSelector((state) => state.user);
-
-  const dispatch = useAppDispatch();
-  const { addNotification } = useNotification();
-
   const [passwordShown, setIsPasswordShown] = useState<1 | 2 | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [input, setInput] = useState<Input>(emptyInput);
 
+  const dispatch = useAppDispatch();
+  const { addNotification } = useNotification();
+
   const navigate = useNavigate();
+  const isMobile = useMediaQuery({ maxWidth: 639 });
 
   const { email, password, repeatPassword } = input;
-
-  const isMobile = useMediaQuery({ maxWidth: 639 });
 
   const authType = type === 'signup' ? 'Sign Up' : 'Login';
   const bg = type === 'login' ? '#FDF00E' : '#C8ACFD';
 
-  const text = {
-    login: 'Happy you are back!',
-    signup: `Guess what? We're not here to flood your inbox with annoying newsletters. Nope, that's not our style. Instead, why not create your own account and stash all the cool, useful stuff you find? So, go ahead, sign up, and start saving those gems!`,
-  };
-
+  // State
+  
   const addUser = (user: User) => {
     dispatch(userActions.setUser(user));
   };
+
+  // Navigation
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+  
+  // Form logic
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -84,7 +86,6 @@ export const AuthPage: React.FC<Props> = ({ type }) => {
       
       window.open('/', '_self');
       
-      // addNotification('You logged in!', 'Success');
       setInput(emptyInput);
     } catch(e) {
       addNotification(e.response.data.message, 'Error');
@@ -136,9 +137,7 @@ export const AuthPage: React.FC<Props> = ({ type }) => {
     handleAuth();
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
+  
 
   return (
     <section
@@ -194,7 +193,7 @@ export const AuthPage: React.FC<Props> = ({ type }) => {
                 Hey there!
                 <br />
                 <br />
-                {type === 'login' ? text.login : text.signup}
+                {type === 'login' ? authText.login : authText.signup}
               </p>
             </div>
 
