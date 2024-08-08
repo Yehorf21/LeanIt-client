@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { CardType, getCards } from '../../api/cards';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { actions as cardsActions } from '../../store/reducers/cardsReducer';
-import { getLiked, LikedArticle } from '../../api/auth';
-import { actions as userActions } from '../../store/reducers/userReducer';
 import { useNotification } from '../../hooks';
+import { NotFound } from '../notfound/NotFound';
 
 interface Props {
   title: 'Grammar' | 'Video' | 'Liked';
@@ -17,9 +16,10 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
   const [maxPages, setMaxPages] = useState(0);
   const { cards } = useAppSelector((state) => state.cards);
   const { liked } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
 
+  const dispatch = useAppDispatch();
   const { addNotification } = useNotification();
+
   const navigate = useNavigate();
 
   const cardSettings = {
@@ -38,17 +38,9 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
     dispatch(cardsActions.addCards(values));
   };
 
-  const setLiked = (value: LikedArticle[]) => {
-    dispatch(userActions.setLiked(value));
-  };
-
-  const addLiked = (value: LikedArticle[]) => {
-    dispatch(userActions.pushToLiked(value));
-  };
-
   const handleNumberOfPages = () => setNumberOfPages(numberOfPages + 1);
 
-  // Routes
+  // Navigation
 
   const handleGoBack = () => {
     navigate(-1);
@@ -57,18 +49,11 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
   // API
 
   type CardSetter = (data: CardType[]) => void;
-  type LikeSetter = (data: LikedArticle[]) => void;
 
   const fetchCards = async (setter: CardSetter, page: number) => {
     getCards(title, page)
       .then((res) => setter(res.data.content))
       .catch(() => addNotification('Cards did not load', 'Error'));
-  };
-
-  const fetchLiked = async (setter: LikeSetter, page: number) => {
-    getLiked(page)
-      .then((res) => setter(res.data))
-      .catch(() => addNotification('Liked articles did not load', 'Error'));
   };
 
   // Lifecycle methods
@@ -79,17 +64,13 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
 
       return;
     }
-
-    // fetchLiked(setLiked, 0);
-  }, []);
+  }, [title]);
 
   useEffect(() => {
     if (numberOfPages !== 0) {
       if (title !== 'Liked') {
         fetchCards(addCards, numberOfPages);
       }
-
-      // fetchLiked(addLiked, numberOfPages);
     }
   }, [numberOfPages]);
 
@@ -103,19 +84,20 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
       }
     };
 
-    fetchMaxPages();
+    if (title !== 'Liked') {
+      fetchMaxPages();
+    }
   }, [title]);
-
-  // TO BE REMOVED WHEN THE DATABASE IS CONNECTED
-  // useEffect(() => {
-  //   setCards(cardContext);
-  // }, []);
 
   const shownCards = useMemo(() => {
     return title !== 'Liked' ? cards : liked;
   }, [cards, liked]);
 
-  return (
+  const isEmpty = title === 'Liked' && !liked?.length;
+
+  return isEmpty ? (
+    <NotFound type="noFavorites" />
+  ) : (
     <section className="padding pt-[100px] pb-[100px] lg:pt-[200px] flex flex-col gap-8 lg:gap-12">
       <div className="flex flex-col justify-center lg:justify-normal lg:items-center lg:flex-row gap-2 lg:gap-4">
         {/* Arrow */}
@@ -135,7 +117,7 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
         ))}
       </div>
 
-      {numberOfPages !== maxPages - 1 && (
+      {numberOfPages !== maxPages - 1 && title !== 'Liked' && (
         <button
           className="flex items-center justify-center gap-4 w-[100%] h-14 lg:h-16 sm:max-w-[292px] bg-additional rounded-[100px]"
           onClick={handleNumberOfPages}

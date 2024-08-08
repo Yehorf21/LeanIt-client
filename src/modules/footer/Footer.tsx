@@ -1,22 +1,6 @@
-export const Footer = () => {
-  const contributorsContext = [
-    {
-      role: 'designer',
-      name: 'Nataliia Yasnohorska',
-      link: 'https://www.behance.net/nataliayasnoho',
-    },
-    {
-      role: 'frontend',
-      name: 'Yehor Feshchenko',
-      link: 'https://yehorf21.github.io/Portfolio/',
-    },
-    {
-      role: 'backend',
-      name: 'Ivan Bakhmet',
-      link: 'https://github.com/BakhmetIvan',
-    },
-  ];
+import { contributorsContext } from "../../helpers";
 
+export const Footer = () => {
   const handleScrollToTop = () => {
     window.scrollTo(0, 0);
   };

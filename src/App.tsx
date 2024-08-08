@@ -8,7 +8,11 @@ import {
 } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from './store/hooks.ts';
-import { User, actions as userActions } from './store/reducers/userReducer.ts';
+import {
+  fetchLikedArticles,
+  User,
+  actions as userActions,
+} from './store/reducers/userReducer.ts';
 
 import { NavBar } from './modules/navbar/NavBar.tsx';
 import { Footer } from './modules/footer/Footer.tsx';
@@ -18,10 +22,6 @@ import { Loader } from './modules/loader/Loader.tsx';
 const AuthPage = lazy(() => import('./modules/auth/AuthPage.tsx'));
 
 const Home = lazy(() => import('./modules/home/Home.tsx'));
-
-interface Props {
-  title: string;
-}
 
 const CardsGrid = lazy(() => import('./modules/cards/CardsGrid.tsx'));
 
@@ -38,43 +38,40 @@ import { NotFound } from './modules/notfound/NotFound.tsx';
 import './App.css';
 import { useMediaQuery } from 'react-responsive';
 import { Notification } from './modules/notification/Notification.tsx';
-import { getProfile } from './api/auth.ts';
+import { getLiked, getProfile, LikedArticle } from './api/user.ts';
 import { useNotification } from './hooks.ts';
 import { getLocalWithExpiry, setLocalWithExpiry } from './helpers.ts';
 
-{
-  /* <div style="max-width:854px"><div style="position:relative;height:0;padding-bottom:56.25%"><iframe src="https://embed.ted.com/talks/lang/en/jakob_christensen_dalsgaard_these_animals_can_hear_everything" width="854" height="480" style="position:absolute;left:0;top:0;width:100%;height:100%" frameborder="0" scrolling="no" allowfullscreen></iframe></div></div> */
-}
-
 /*
 
+  Checked components:
+
+  - AuthPage
+  - Explore More
+  - Flashcard (add anki)
+  - Footer
+  - Home
+  - Loader
+  - Menu
+  - NavBar
+  - NotFound
+  - Notification
+  - Profile
+  - ResourcesPage
+  - 
+
+  To check:
+
+  - Card
+  - CardPage
+  - CardsGrid
+
   TO DO:
-
-  * Add password update +
-  * Connect video +
-  * Connect resources +
-  * Add image update +
-  * Pagination +
-  * Connect grammar +
-  * Do search +
-  * Image height on cards +
-  * Remove "Show more" button when all items were loaded +
-  * Fetch all resources +
-  * Add back-end to cubes +
-
   
-  * Connect auth ~
-  * Add pop-up notifications ~
-  * Add a favicon ~
-  
-  * Add anki
-  * Handle article page - To check
-  * Set up related topics - To check
-  * Add logic for adding / removing liked - 401
+  * Add image to empty liked
 
-  * Return an error when user already exists
-  
-  * Add skeleton loading to the cards
+  * Add logic for adding / removing liked
+
   * Name and email not showing
   
 */
@@ -83,11 +80,11 @@ function App() {
   const { user, notification } = useAppSelector((state) => state.user);
   const { title, type } = notification;
 
-  const { pathname } = useLocation();
-  const isMobile = useMediaQuery({ maxWidth: 639 });
-
   const dispatch = useAppDispatch();
   const { addNotification } = useNotification();
+
+  const isMobile = useMediaQuery({ maxWidth: 639 });
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   const mainCardsPages = ['Grammar', 'Video'];
@@ -129,12 +126,8 @@ function App() {
 
     const fetchUser = async () => {
       const fetchedUser = (await getProfile()).data;
-      try {
-        if (isLoggedIn) {
-          addUser(fetchedUser);
-        }
-      } catch {
-        // addNotification("User couldn't be retrieved", 'Error');
+      if (isLoggedIn) {
+        addUser(fetchedUser);
       }
     };
 
@@ -160,11 +153,18 @@ function App() {
     }
   }, [user.name]);
 
+  useEffect(() => {
+    const isLoggedIn = getLocalWithExpiry('user');
+
+    if (isLoggedIn) {
+      dispatch(fetchLikedArticles());
+    }
+  }, []);
+
   return (
     <div className="overflow-x-hidden">
       <header>
         {!isNoNavBar && <NavBar />}
-
         {title && <Notification title={title} type={type} />}
       </header>
 

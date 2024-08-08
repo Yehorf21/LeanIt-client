@@ -9,10 +9,8 @@ interface Props {
 }
 
 export const FlashCard: React.FC<Props> = ({ card, backgroundColor }) => {
-  const [isStarred, setIsStarred] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { imageUrl, front, back } = card;
-
-  const handleStar = () => setIsStarred(!isStarred);
 
   return (
     <article
@@ -22,22 +20,17 @@ export const FlashCard: React.FC<Props> = ({ card, backgroundColor }) => {
       }}
     >
       <div className="relative">
-        <img
-          className="h-[43%] w-[100%] object-cover rounded-[16px]"
-          src={imageUrl}
-          alt="card-image"
-        />
-
-        <button
-          className="absolute flex justify-center items-center h-10 w-10 top-6 right-6 bg-white rounded-full"
-          onClick={handleStar}
-        >
-          <div
-            className={cn('star h-6 w-6 bg-no-repeat bg-contain z-20', {
-              'star-added': isStarred,
-            })}
+        <div className={cn('h-[150px] lg:h-[200px] w-[100%]', {
+          'skeleton-card-image': !isImageLoaded,
+        })}>
+          <img
+            className="h-[100%] w-[100%] object-cover rounded-[16px]"
+            src={imageUrl}
+            alt="card-image"
+            loading="lazy"
+            onLoad={() => setIsImageLoaded(true)}
           />
-        </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-8">

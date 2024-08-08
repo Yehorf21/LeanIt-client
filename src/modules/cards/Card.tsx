@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 
 import { CardSettings, generateSlug, shortenDescription } from '../../helpers';
@@ -7,8 +7,11 @@ import { CardType } from '../../api/cards';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { actions as cardsActions } from '../../store/reducers/cardsReducer';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { actions as userActions } from '../../store/reducers/userReducer';
-import { LikedArticle, postLiked, removeLiked } from '../../api/auth';
+import {
+  fetchLikedArticles,
+  actions as userActions,
+} from '../../store/reducers/userReducer';
+import { LikedArticle, postLiked, removeLiked } from '../../api/user';
 
 interface Props {
   card: CardType;
@@ -34,10 +37,6 @@ export const Card: React.FC<Props> = ({ card, settings }) => {
 
   const link = '/' + cardType + '/' + generateSlug(title);
 
-  const isLiked = useMemo(() => {
-    return liked.some((article) => article.articleId === id);
-  }, [liked]);
-
   // Responsiveness
 
   const getWidth = isGrid
@@ -46,13 +45,9 @@ export const Card: React.FC<Props> = ({ card, settings }) => {
 
   // State
 
-  const addLiked = (value: LikedArticle) => {
-    dispatch(userActions.addLiked(value));
-  };
-
-  const deleteLiked = (id: number) => {
-    dispatch(userActions.removeLiked(id));
-  };
+  const likedPost = useMemo(() => {
+    return liked.find((article) => article.id === id && article.type === type);
+  }, [liked, id, type]);
 
   const handleHeart = async () => {
     const likedArticle = {
@@ -65,27 +60,26 @@ export const Card: React.FC<Props> = ({ card, settings }) => {
       return;
     }
 
-    if (!isLiked) {
-      addLiked(likedArticle);
+    try {
+      if (!likedPost) {
+        await postLiked(likedArticle);
+      } else {
+        await removeLiked(likedPost?.favoriteId);
+      }
 
-      postLiked(likedArticle).catch(() => {
-        addNotification('There was an error', 'Error');
-        deleteLiked(id);
-      });
-
-      return;
+      dispatch(fetchLikedArticles());
+    } catch {
+      addNotification('Action failed', 'Error');
     }
-
-    deleteLiked(id);
-
-    removeLiked(id).catch(() => {
-      addNotification('Favorite did not get removed', 'Error');
-      addLiked(likedArticle);
-    });
   };
 
+  const resourcesPaths = ['/', '/liked'];
+  const isExternalResource =
+    cardType !== 'resources' ||
+    resourcesPaths.some((resourcePath) => pathname === resourcePath);
+
   const handlePickedCard = (value: CardType) => {
-    if (cardType !== 'resources' || pathname === '/') {
+    if (isExternalResource) {
       type === 'resources' ? window.open(href, '_blank') : navigate(link);
     } else {
       dispatch(cardsActions.addPickedCard(value));
@@ -150,7 +144,7 @@ export const Card: React.FC<Props> = ({ card, settings }) => {
         >
           <div
             className={cn('like h-6 w-6 bg-no-repeat bg-contain z-20', {
-              'like-added': isLiked,
+              'like-added': likedPost,
             })}
           />
         </button>

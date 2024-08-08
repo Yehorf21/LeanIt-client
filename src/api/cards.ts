@@ -39,6 +39,8 @@ export interface SearchCardType {
   title: string;
   imageUrl: string;
   type: CardTypes;
+  description: string;
+  href: string;
 }
 
 export const getCards = (type: CardTypes, page?: number, size?: number) => {
@@ -51,4 +53,8 @@ export const getCard = (type: CardTypes, id: number) => {
 
 export const searchCards = (title: string) => {
   return instance.get<SearchCardType[]>(`search?title=${title}&size=3`);
+};
+
+export const postAnkiCard = (id: number) => {
+  return instance.post(`anki/${id}`);
 };

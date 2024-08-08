@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { emptyUser, actions as userActions } from '../../store/reducers/userReducer';
+import { Link } from '../link/Link';
 
 export const Menu = () => {
   const { user } = useAppSelector((state) => state.user);
@@ -22,16 +23,16 @@ export const Menu = () => {
             className="font-secondary text-32 sm:text-64 font-bold text-primary uppercase cursor-pointer"
             key={page}
           >
-            <a className="nav-link relative" href={`/${page}`}>
+            <Link className="nav-link relative" path={`/${page}`}>
               {page}
-            </a>
+            </Link>
           </li>
         ))}
 
         <hr className="-ml-5 sm:-ml-8 w-[100vw] h-[1px] bg-white" />
 
         {user?.name && (
-          <a href="/profile" className="flex justify-between items-center">
+          <Link path="/profile" className="flex justify-between items-center">
             <div className="flex gap-4 sm:gap-6 items-center">
               <img
                 src={`/images/profile/profile-${user?.imageId || 1}.png`}
@@ -45,7 +46,7 @@ export const Menu = () => {
             </div>
 
             <button className="chevron-dark h-6 w-6 bg-contain bg-no-repeat" />
-          </a>
+          </Link>
         )}
       </ul>
 

@@ -26,10 +26,10 @@ const initialCubeState: CubeCards = {
 
 export const SeeMore = () => {
   const [isShown, setIsShown] = useState(true);
-  const isMobile = useMediaQuery({ maxWidth: 639 });
-  const { addNotification } = useNotification();
-
   const [cubeCards, setCubeCards] = useState(initialCubeState);
+
+  const { addNotification } = useNotification();
+  const isMobile = useMediaQuery({ maxWidth: 639 });
 
   const pages: CardTypes[] = ['grammar', 'video', 'resources'];
   const mobileCubes = isMobile ? 1 : undefined;
@@ -38,6 +38,8 @@ export const SeeMore = () => {
     bgColor: '#EEE6FE',
     hasButton: true,
   };
+
+  // State
 
   const handleHover = () => {
     setTimeout(() => {
@@ -52,12 +54,13 @@ export const SeeMore = () => {
     }, 5000);
   };
 
+  // API
+
   const fetchCards = async () => {
     try {
       for (const category of pages) {
         const fetchedCards = (await getCards(category, 0, mobileCubes)).data
           .content;
-        console.log(fetchedCards);
 
         setCubeCards((cards) => {
           return { ...cards, [category]: fetchedCards };

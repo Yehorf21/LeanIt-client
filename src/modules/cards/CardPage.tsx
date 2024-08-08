@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { ExploreMore } from '../explore-more/ExploreMore';
 
@@ -13,13 +13,15 @@ import 'swiper/css/pagination';
 import { EffectCards } from 'swiper/modules';
 
 import { useEffect, useMemo, useState } from 'react';
-import { cardContext, generateSlug, ungenerateSlug } from '../../helpers';
+import { generateSlug, ungenerateSlug } from '../../helpers';
 import { FlashCard } from '../flashcard/FlashCard';
-import { useMediaQuery } from 'react-responsive';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { LikedArticle, postLiked, removeLiked } from '../../api/auth';
+import { LikedArticle, postLiked, removeLiked } from '../../api/user';
 import { useNotification } from '../../hooks';
-import { actions as userActions } from '../../store/reducers/userReducer';
+import {
+  fetchLikedArticles,
+  actions as userActions,
+} from '../../store/reducers/userReducer';
 import {
   AnkiCard,
   CardArticleType,
@@ -29,6 +31,8 @@ import {
   GrammarType,
   searchCards,
 } from '../../api/cards';
+import { Link } from '../link/Link';
+import { useMediaQuery } from 'react-responsive';
 
 interface Props {
   type: 'grammar' | 'video';
@@ -43,52 +47,45 @@ export const CardPage: React.FC<Props> = ({ type }) => {
   const dispatch = useAppDispatch();
   const { addNotification } = useNotification();
   const navigate = useNavigate();
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
 
   const [areTopicsShown, setAreTopicsShown] = useState(false);
 
   const articleBorder = areTopicsShown ? '0px' : '24px';
 
-
   const handleGoBack = () => {
     navigate(-1);
   };
 
-  // const isLiked = useMemo(() => {
-  //   return liked.some((article) => article.articleId === 1); // for now
-  // }, [liked]);
+  const likedPost = useMemo(() => {
+    return liked.find((article) => article.id === card?.id);
+  }, [liked, card]);
 
-  // State
 
-  const addLiked = (value: LikedArticle) => {
-    dispatch(userActions.addLiked(value));
-  };
-
-  const deleteLiked = (id: number) => {
-    dispatch(userActions.removeLiked(id));
-  };
+  // API
 
   const handleHeart = async () => {
-    // const likedArticle = {
-    //   articleId: 1, // for now
-    //   type,
-    // };
-    // if (!user.name) {
-    //   addNotification('You need to log in first', 'Error');
-    //   return;
-    // }
-    // if (!isLiked) {
-    //   addLiked(likedArticle);
-    //   postLiked(likedArticle).catch(() => {
-    //     addNotification('There was an error', 'Error');
-    //     deleteLiked(1);
-    //   });
-    //   return;
-    // }
-    // deleteLiked(1);
-    // removeLiked(1).catch(() => {
-    //   addNotification('Favorite did not get removed', 'Error');
-    //   addLiked(likedArticle);
-    // });
+    const likedArticle = {
+      articleId: card?.id as number,
+      type,
+    };
+
+    if (!user.name) {
+      addNotification('You need to log in first', 'Error');
+      return;
+    }
+
+    try {
+      if (!likedPost) {
+        await postLiked(likedArticle);
+      } else {
+        await removeLiked(likedPost?.favoriteId);
+      }
+
+      dispatch(fetchLikedArticles());
+    } catch {
+      addNotification('Action failed', 'Error');
+    }
   };
 
   const handleTopics = () => {
@@ -116,6 +113,12 @@ export const CardPage: React.FC<Props> = ({ type }) => {
   }, []);
 
   useEffect(() => {
+    if (isDesktop) {
+      setAreTopicsShown(true);
+    }
+  }, [card]);
+
+  useEffect(() => {
     const fetchCard = async () => {
       searchCards(ungenerateSlug(cardId as string))
         .then((res) => getCard(type, res.data[0].id))
@@ -128,7 +131,7 @@ export const CardPage: React.FC<Props> = ({ type }) => {
 
   return (
     <section className="padding pt-10 lg:pt-20 pb-[100px] flex flex-col gap-8 lg:gap-[53px] min-h-[70vh]">
-      <div className="flex flex-col justify-center lg:justify-normal lg:items-center lg:flex-row gap-2 lg:gap-4">
+      <div className="flex flex-col justify-center lg:justify-normal lg:flex-row gap-2 lg:gap-4">
         <button
           className="arrow-left bg-no-repeat bg-contain h-4 sm:h-8 w-4 sm:w-8"
           onClick={handleGoBack}
@@ -158,7 +161,7 @@ export const CardPage: React.FC<Props> = ({ type }) => {
                 >
                   <div
                     className={cn('like h-6 w-6 bg-no-repeat bg-contain z-20', {
-                      // 'like-added': isLiked,
+                      'like-added': likedPost,
                     })}
                   />
                 </button>
@@ -228,7 +231,7 @@ export const CardPage: React.FC<Props> = ({ type }) => {
                 >
                   <div
                     className={cn('like h-6 w-6 bg-no-repeat bg-contain z-20', {
-                      // 'like-added': isLiked,
+                      'like-added': likedPost,
                     })}
                   />
                 </button>
@@ -326,11 +329,11 @@ export const CardPage: React.FC<Props> = ({ type }) => {
               )}
             >
               {relatedTopics.map((topic) => (
-                <a href={`/${type}/${generateSlug(topic)}`} key={topic}>
+                <Link path={`/${type}/${generateSlug(topic)}`} key={topic}>
                   <li className="font-main text-16 lg:text-20 text-text-secondary font-semibold uppercase">
                     {topic}
                   </li>
-                </a>
+                </Link>
               ))}
             </ul>
           )}

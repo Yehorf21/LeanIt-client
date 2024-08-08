@@ -5,107 +5,111 @@ import { useMediaQuery } from 'react-responsive';
 import { Circles } from 'react-loader-spinner';
 
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { profileImages } from '../../helpers';
+import { profileImages, profilePagesContext } from '../../helpers';
 import {
   emptyUser,
   actions as userActions,
 } from '../../store/reducers/userReducer';
-import { updateImage, updatePassword, updateProfile } from '../../api/auth';
+import { updateImage, updatePassword, updateProfile } from '../../api/user';
 import { Notification } from '../notification/Notification';
 import { useNotification } from '../../hooks';
+import { Link } from '../link/Link';
 
-interface FormOne {
+interface updateProfileForm {
   email: string;
   name: string;
 }
 
-interface FormTwo {
+interface updatePasswordForm {
   oldPassword: string;
   newPassword: string;
   repeatPassword: string;
 }
 
-const initialFormTwo: FormTwo = {
+const updateProfileInitial: updatePasswordForm = {
   oldPassword: '',
   newPassword: '',
   repeatPassword: '',
 };
 
-type Submit = 'first' | 'second' | null;
+const updatePasswordInitial: updateProfileForm = {
+  email: '',
+  name: '',
+};
+
+type Submit = 'profile' | 'password' | 'image' | null;
 
 export const Profile = () => {
   const { user } = useAppSelector((state) => state.user);
 
-  const { addNotification } = useNotification();
-  const dispatch = useAppDispatch();
+  const [updateProfileForm, setUpdateProfileForm] = useState<updateProfileForm>(
+    updatePasswordInitial
+  );
+  const { email, name } = updateProfileForm;
 
-  const initialFormOne: FormOne = {
-    email: '',
-    name: '',
-  };
-
-  const [formOneInput, setFormOneInput] = useState<FormOne>(initialFormOne);
-  const { email, name } = formOneInput;
-
-  const [formTwoInput, setFormTwoInput] = useState<FormTwo>(initialFormTwo);
-  const { oldPassword, newPassword, repeatPassword } = formTwoInput;
+  const [updatePasswordForm, setUpdatePasswordForm] =
+    useState<updatePasswordForm>(updateProfileInitial);
+  const { oldPassword, newPassword, repeatPassword } = updatePasswordForm;
 
   const [isSubmitting, setIsSubmitting] = useState<Submit>(null);
-
   const [isCameraClicked, setIsCameraClicked] = useState(false);
+
+  const { addNotification } = useNotification();
+  const dispatch = useAppDispatch();
 
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const navigate = useNavigate();
 
-  const pagesContext = [
-    {
-      img: 'images/liked.png',
-      title: 'Liked',
-      icon: 'like-added',
-    },
-    {
-      img: 'images/posted.png',
-      title: 'Posted',
-      icon: 'post-filled',
-    },
-  ];
+  // State
+
+  const setUserImage = (imageId: number) => {
+    dispatch(userActions.setUserImage(imageId));
+  };
+
+  // Navigation
 
   const handleGoBack = () => {
     navigate(-1);
   };
+
+  // Local storage
 
   const handleLogOut = () => {
     dispatch(userActions.setUser(emptyUser));
 
     localStorage.removeItem('user');
     localStorage.removeItem('logged-in-notification');
+
+    navigate('/');
   };
 
-  const handleInputOne = (
+  // Form logic
+
+  const handleUpdateProfile = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: keyof FormOne
+    type: keyof updateProfileForm
   ) => {
-    setFormOneInput((input) => ({ ...input, [type]: e.target.value }));
+    setUpdateProfileForm((input) => ({ ...input, [type]: e.target.value }));
   };
 
-  const handleInputTwo = (
+  const handleUpdatePassword = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: keyof FormTwo
+    type: keyof updatePasswordForm
   ) => {
-    setFormTwoInput((input) => ({ ...input, [type]: e.target.value }));
+    setUpdatePasswordForm((input) => ({ ...input, [type]: e.target.value }));
   };
 
-  const handleRequest = async (type: 'first' | 'second') => {
+  const handleRequest = async (type: 'profile' | 'password') => {
     setIsSubmitting(type);
     try {
-      if (type === 'first') {
-        await updateProfile(formOneInput);
+      if (type === 'profile') {
+        await updateProfile(updateProfileForm);
 
         addNotification('Profile data got updated', 'Success');
         return;
       }
 
-      await updatePassword(formTwoInput);
+      await updatePassword(updatePasswordForm);
       addNotification('Password was updated', 'Success');
     } catch {
       addNotification('Something went wrong', 'Error');
@@ -114,12 +118,8 @@ export const Profile = () => {
     }
   };
 
-  const setUserImage = (imageId: number) => {
-    dispatch(userActions.setUserImage(imageId));
-  };
-
-  const isInputValid = (type: 'first' | 'second') => {
-    if (type === 'first') {
+  const isInputValid = (type: 'profile' | 'password') => {
+    if (type === 'profile') {
       if (!email.trim() || !name.trim()) {
         addNotification('Enter valid data in all fields', 'Error');
 
@@ -127,7 +127,7 @@ export const Profile = () => {
       }
     }
 
-    if (type === 'second') {
+    if (type === 'password') {
       if (
         !oldPassword.trim() ||
         !newPassword.trim() ||
@@ -148,19 +148,30 @@ export const Profile = () => {
     return true;
   };
 
-  const handleForm = (e: React.FormEvent, type: 'first' | 'second') => {
+  const handleForm = async (
+    e: React.FormEvent,
+    type: 'profile' | 'password'
+  ) => {
     e.preventDefault();
 
     if (!isInputValid(type)) {
       return;
     }
 
-    handleRequest(type);
-    setFormOneInput(initialFormOne);
-    setFormTwoInput(initialFormTwo);
+    await handleRequest(type);
+
+    if (type === 'profile') {
+      setUpdateProfileForm(updatePasswordInitial);
+
+      return;
+    }
+    setUpdatePasswordForm(updateProfileInitial);
   };
 
+  // API
+
   const handleUserImage = async (imageId: number) => {
+    setIsSubmitting('image');
     try {
       await updateImage(imageId);
       setUserImage(imageId);
@@ -168,11 +179,15 @@ export const Profile = () => {
       addNotification('Image was updated', 'Success');
     } catch {
       <Notification title="Image could not be updated" type="Error" />;
+    } finally {
+      setIsSubmitting(null);
     }
   };
 
+  // Lifecycle methods
+
   useEffect(() => {
-    setFormOneInput(initialFormOne);
+    setUpdateProfileForm(updatePasswordInitial);
   }, []);
 
   useEffect(() => {
@@ -210,14 +225,26 @@ export const Profile = () => {
                 className="absolute -bottom-7 left-14 lg:left-[72px] flex justify-center items-center h-12 w-12 lg:h-14 lg:w-14 bg-secondary rounded-full"
                 onClick={() => setIsCameraClicked(!isCameraClicked)}
               >
-                <div
-                  className={cn(
-                    'camera h-6 lg:h-8 w-6 lg:w-8 bg-contain bg-no-repeat',
-                    {
-                      'camera-filled': isCameraClicked,
-                    }
-                  )}
-                ></div>
+                {isSubmitting === 'image' ? (
+                  <Circles
+                    height="30"
+                    width="30"
+                    color="#fff"
+                    ariaLabel="circles-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                    visible={true}
+                  />
+                ) : (
+                  <div
+                    className={cn(
+                      'camera h-6 lg:h-8 w-6 lg:w-8 bg-contain bg-no-repeat',
+                      {
+                        'camera-filled': isCameraClicked,
+                      }
+                    )}
+                  />
+                )}
               </button>
 
               {isCameraClicked && (
@@ -243,9 +270,9 @@ export const Profile = () => {
           </div>
 
           <div className="flex flex-col gap-20 lg:gap-[134px] sm:self-center">
-            {pagesContext.map((page) => (
-              <a
-                href={`/${page.title.toLowerCase()}`}
+            {profilePagesContext.map((page) => (
+              <Link
+                path={`/${page.title.toLowerCase()}`}
                 className="group relative flex sm:w-[70vw] lg:w-[503px] items-center gap-6 max-w-[503px] bg-[#FEF99F] p-6 lg:p-10 rounded-[24px] cursor-pointer"
                 key={page.title}
               >
@@ -262,7 +289,7 @@ export const Profile = () => {
                   src={page.img}
                   alt="page-image"
                 />
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -281,7 +308,7 @@ export const Profile = () => {
           <form
             action="#"
             className="flex flex-col gap-8 lg:gap-10"
-            onSubmit={(e) => handleForm(e, 'first')}
+            onSubmit={(e) => handleForm(e, 'profile')}
           >
             <legend className="font-main text-20 sm:text-28 font-semibold text-text-primary">
               Edit info
@@ -298,7 +325,7 @@ export const Profile = () => {
                   className="pt-[15px] pb-[15px] px-6 sm:px-[30px] rounded-[80px] font-main text-20 sm:text-24 text-text-secondary"
                   placeholder={'Enter your email'}
                   value={email}
-                  onChange={(e) => handleInputOne(e, 'email')}
+                  onChange={(e) => handleUpdateProfile(e, 'email')}
                 />
               </div>
 
@@ -312,13 +339,13 @@ export const Profile = () => {
                   className="pt-[15px] pb-[15px] px-6 sm:px-[30px] rounded-[80px] font-main text-20 sm:text-24 text-text-secondary"
                   placeholder="Enter your name"
                   value={name}
-                  onChange={(e) => handleInputOne(e, 'name')}
+                  onChange={(e) => handleUpdateProfile(e, 'name')}
                 />
               </div>
             </div>
 
             <button className="flex justify-center items-center h-14 sm:h-16 max-w-[500px] lg:max-w-[292px] bg-primary rounded-[100px] font-main text-white text-16 sm:text-20 font-semibold uppercase">
-              {isSubmitting === 'first' ? (
+              {isSubmitting === 'profile' ? (
                 <Circles
                   height="30"
                   width="30"
@@ -337,7 +364,7 @@ export const Profile = () => {
           <form
             action="#"
             className="flex flex-col gap-8 lg:gap-10"
-            onSubmit={(e) => handleForm(e, 'second')}
+            onSubmit={(e) => handleForm(e, 'password')}
           >
             <legend className="font-main text-20 sm:text-28 font-semibold text-text-primary">
               Change password
@@ -354,7 +381,7 @@ export const Profile = () => {
                   className="pt-[15px] pb-[15px] px-6 sm:px-[30px] rounded-[80px] font-main text-20 sm:text-24 text-text-secondary"
                   placeholder="Enter current password"
                   value={oldPassword}
-                  onChange={(e) => handleInputTwo(e, 'oldPassword')}
+                  onChange={(e) => handleUpdatePassword(e, 'oldPassword')}
                 />
               </div>
 
@@ -368,7 +395,7 @@ export const Profile = () => {
                   className="pt-[15px] pb-[15px] px-6 sm:px-[30px] rounded-[80px] font-main text-20 sm:text-24 text-text-secondary"
                   placeholder="Enter new password"
                   value={newPassword}
-                  onChange={(e) => handleInputTwo(e, 'newPassword')}
+                  onChange={(e) => handleUpdatePassword(e, 'newPassword')}
                 />
               </div>
 
@@ -382,13 +409,13 @@ export const Profile = () => {
                   className="pt-[15px] pb-[15px] px-6 sm:px-[30px] rounded-[80px] font-main text-20 sm:text-24 text-text-secondary"
                   placeholder="Confirm new password"
                   value={repeatPassword}
-                  onChange={(e) => handleInputTwo(e, 'repeatPassword')}
+                  onChange={(e) => handleUpdatePassword(e, 'repeatPassword')}
                 />
               </div>
             </div>
 
             <button className="flex justify-center items-center h-14 sm:h-16 max-w-[500px] lg:max-w-[292px] bg-primary rounded-[100px] font-main text-white text-16 sm:text-20 font-semibold uppercase">
-              {isSubmitting === 'second' ? (
+              {isSubmitting === 'password' ? (
                 <Circles
                   height="30"
                   width="30"

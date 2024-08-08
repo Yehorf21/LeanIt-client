@@ -1,14 +1,6 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { SearchCardType } from '../../api/cards';
-import { LikedArticle } from '../../api/auth';
-
-// export interface Post {
-//   id: number;
-//   title: string;
-//   descrtiption: string;
-//   imageUrl: string;
-//   href: string;
-// }
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { CardType, SearchCardType } from '../../api/cards';
+import { getLiked, LikedArticle } from '../../api/user';
 
 export interface User {
   id: number;
@@ -48,6 +40,18 @@ const initialState: UserData = {
   notification: emptyNotification,
 };
 
+export const fetchLikedArticles = createAsyncThunk(
+  'likedArticles/fetchLikedArticles',
+  async (_, thunkAPI) => {
+    try {
+      const fetchedArticles = await getLiked();
+      return fetchedArticles.flatMap(article => article.data.content);
+    } catch (error) {
+      return thunkAPI.rejectWithValue('Failed to fetch liked articles');
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -60,36 +64,20 @@ const userSlice = createSlice({
       state.user.imageId = action.payload;
     },
 
-    setLiked: (state, action: PayloadAction<LikedArticle[]>) => {
-      state.liked = (action.payload);
-    },
-
     pushToLiked: (state, action: PayloadAction<LikedArticle[]>) => {
       state.liked.push(...action.payload);
-    },
-
-    addLiked: (state, action: PayloadAction<LikedArticle>) => {
-      state.liked.push(action.payload);
-    },
-
-    addPosted: (state, action: PayloadAction<SearchCardType>) => {
-      state.posted.push(action.payload);
-    },
-
-    removeLiked: (state, action: PayloadAction<number>) => {
-      state.liked = state.liked.filter((liked) => liked.articleId !== action.payload);
-    },
-
-    removePosted: (state, action: PayloadAction<number>) => {
-      state.posted = state.posted.filter(
-        (posted) => posted.id !== action.payload
-      );
     },
 
     setNotification: (state, action: PayloadAction<Notification>) => {
       state.notification = action.payload;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchLikedArticles.fulfilled, (state, action: PayloadAction<LikedArticle[]>) => {
+        state.liked = action.payload;
+      })
+  }
 });
 
 export default userSlice.reducer;

@@ -29,6 +29,12 @@ export interface LikedArticle {
 
 const token = getLocalWithExpiry('user')?.value;
 
+const authHeader = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
+
 export const sendAuth = (
   type: 'login' | 'registration',
   data: Login | Signup
@@ -42,57 +48,38 @@ export const sendAuth = (
 };
 
 export const getProfile = () => {
-  return instance.get<User>('profile', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return instance.get<User>('profile', authHeader);
 };
 
 export const updateProfile = ({ name, email }: Profile) => {
-  return instance.put('profile/update-info', { name, email }, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return instance.put('profile/update-info', { name, email }, authHeader);
 };
 
 export const updatePassword = (value: Password) => {
-  return instance.put('profile/update-password', value, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return instance.put('profile/update-password', value, authHeader);
 };
 
 export const updateImage = (imageId: number) => {
-  return instance.put('profile/update-image', { imageId }, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return instance.put('profile/update-image', { imageId }, authHeader);
 };
 
 export const postLiked = (article: LikedArticle) => {
-  return instance.post('profile/favorites', article, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return instance.post('profile/favorites', article, authHeader);
 };
 
 export const removeLiked = (id: number) => {
-  return instance.delete(`profile/favorite/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return instance.delete(`profile/favorites/${id}`, authHeader);
 };
 
-export const getLiked = (page: number) => {
-  return instance.get(`profile/favorites?page=${page}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+const categories = ['grammar', 'video', 'resources'];
+
+export const getLiked = async () => {
+  const promises = categories.map((category) => {
+    return instance.get(
+      `profile/favorites?size=20&type=${category}`,
+      authHeader
+    );
   });
+
+  return await Promise.all(promises);
 };
