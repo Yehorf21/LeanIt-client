@@ -153,7 +153,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!user.name && pathname === '/liked') {
+    const isLoggedIn = getLocalWithExpiry('user');
+
+    if (!isLoggedIn && pathname === '/liked') {
       navigate('/blocked');
     }
   }, [user.name]);

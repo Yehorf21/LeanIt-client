@@ -326,7 +326,7 @@ export const CardPage: React.FC<Props> = ({ type }) => {
               )}
             >
               {relatedTopics.map((topic) => (
-                <a href={`/video/${generateSlug(topic)}`} key={topic}>
+                <a href={`/${type}/${generateSlug(topic)}`} key={topic}>
                   <li className="font-main text-16 lg:text-20 text-text-secondary font-semibold uppercase">
                     {topic}
                   </li>

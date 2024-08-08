@@ -65,11 +65,11 @@ export const CardsGrid: React.FC<Props> = ({ title }) => {
       .catch(() => addNotification('Cards did not load', 'Error'));
   };
 
-  // const fetchLiked = async (setter: LikeSetter, page: number) => {
-  //   getLiked(page)
-  //     .then((res) => setter(res.data))
-  //     .catch(() => addNotification('Liked articles did not load', 'Error'));
-  // };
+  const fetchLiked = async (setter: LikeSetter, page: number) => {
+    getLiked(page)
+      .then((res) => setter(res.data))
+      .catch(() => addNotification('Liked articles did not load', 'Error'));
+  };
 
   // Lifecycle methods
 
