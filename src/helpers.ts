@@ -92,7 +92,7 @@ export const contributorsContext = [
   {
     role: 'frontend',
     name: 'Yehor Feshchenko',
-    link: 'https://yehorf21.github.io/Portfolio/',
+    link: 'https://feyori.netlify.app/',
   },
   {
     role: 'backend',

@@ -10,7 +10,7 @@ export const Header = () => {
         <p className="font-main text-text-primary text-20 lg:text-24 text-center">
           A cozy collection of useful resources to start your English learning
           journey is all gathered here. Study at your own pace, improvise along
-          the way, and don't let your school teacher see it.
+          the way, and don't let your school teacher see this.
         </p>
 
         <a href="#pages" className="mt-8 flex justify-center items-center h-14 w-[85vw] max-w-[398px] bg-primary rounded-[100px] text-[#FFFDFD] font-main text-16 lg:text-20 font-semibold uppercase">Say no more - let's go!</a>

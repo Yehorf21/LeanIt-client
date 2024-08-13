@@ -20,7 +20,7 @@ export const NotFound: React.FC<Props> = ({ type }) => {
 
       <Link
         path="/"
-        className="lg:mt-2 px-12 sm:px-20 lg:px-[112.5px] h-12 lg:h-16 flex justify-center items-center bg-primary rounded-[100px] font-main text-16 lg:text-20 text-white uppercase font-semibold"
+        className="lg:mt-2 px-12 sm:px-20 lg:px-[112.5px] h-12 min-h-12 lg:h-16 lg:min-h-16 flex justify-center items-center bg-primary rounded-[100px] font-main text-16 lg:text-20 text-white uppercase font-semibold"
       >
         Return to Home
       </Link>

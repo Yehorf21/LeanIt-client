@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { CardType, SearchCardType } from '../../api/cards';
+import { SearchCardType } from '../../api/cards';
 import { getLiked, LikedArticle } from '../../api/user';
 
 export interface User {

@@ -38,43 +38,10 @@ import { NotFound } from './modules/notfound/NotFound.tsx';
 import './App.css';
 import { useMediaQuery } from 'react-responsive';
 import { Notification } from './modules/notification/Notification.tsx';
-import { getLiked, getProfile, LikedArticle } from './api/user.ts';
+import { getProfile } from './api/user.ts';
 import { useNotification } from './hooks.ts';
 import { getLocalWithExpiry, setLocalWithExpiry } from './helpers.ts';
 
-/*
-
-  Checked components:
-
-  - AuthPage
-  - Explore More
-  - Flashcard (add anki)
-  - Footer
-  - Home
-  - Loader
-  - Menu
-  - NavBar
-  - NotFound
-  - Notification
-  - Profile
-  - ResourcesPage
-  - 
-
-  To check:
-
-  - Card
-  - CardPage
-  - CardsGrid
-
-  TO DO:
-  
-  * Add image to empty liked
-
-  * Add logic for adding / removing liked
-
-  * Name and email not showing
-  
-*/
 
 function App() {
   const { user, notification } = useAppSelector((state) => state.user);

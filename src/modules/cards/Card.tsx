@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import cn from 'classnames';
 
 import { CardSettings, generateSlug, shortenDescription } from '../../helpers';
@@ -7,11 +7,8 @@ import { CardType } from '../../api/cards';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { actions as cardsActions } from '../../store/reducers/cardsReducer';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  fetchLikedArticles,
-  actions as userActions,
-} from '../../store/reducers/userReducer';
-import { LikedArticle, postLiked, removeLiked } from '../../api/user';
+import { fetchLikedArticles } from '../../store/reducers/userReducer';
+import { postLiked, removeLiked } from '../../api/user';
 
 interface Props {
   card: CardType;
@@ -43,11 +40,12 @@ export const Card: React.FC<Props> = ({ card, settings }) => {
     ? getResponsiveValue('335', '450', '608')
     : getResponsiveValue('280', '300', '387');
 
-  // State
+  // Favorites management
 
   const likedPost = useMemo(() => {
     return liked.find((article) => article.id === id && article.type === type);
   }, [liked, id, type]);
+
 
   const handleHeart = async () => {
     const likedArticle = {
@@ -72,6 +70,8 @@ export const Card: React.FC<Props> = ({ card, settings }) => {
       addNotification('Action failed', 'Error');
     }
   };
+
+  // Route management
 
   const resourcesPaths = ['/', '/liked'];
   const isExternalResource =

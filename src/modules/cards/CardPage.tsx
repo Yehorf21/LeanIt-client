@@ -16,12 +16,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { generateSlug, ungenerateSlug } from '../../helpers';
 import { FlashCard } from '../flashcard/FlashCard';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { LikedArticle, postLiked, removeLiked } from '../../api/user';
+import { postLiked, removeLiked } from '../../api/user';
 import { useNotification } from '../../hooks';
-import {
-  fetchLikedArticles,
-  actions as userActions,
-} from '../../store/reducers/userReducer';
+import { fetchLikedArticles } from '../../store/reducers/userReducer';
 import {
   AnkiCard,
   CardArticleType,
@@ -61,8 +58,7 @@ export const CardPage: React.FC<Props> = ({ type }) => {
     return liked.find((article) => article.id === card?.id);
   }, [liked, card]);
 
-
-  // API
+  // Favorites Management
 
   const handleHeart = async () => {
     const likedArticle = {
@@ -87,6 +83,8 @@ export const CardPage: React.FC<Props> = ({ type }) => {
       addNotification('Action failed', 'Error');
     }
   };
+
+  // Related Topics management
 
   const handleTopics = () => {
     setAreTopicsShown(!areTopicsShown);
@@ -117,6 +115,8 @@ export const CardPage: React.FC<Props> = ({ type }) => {
       setAreTopicsShown(true);
     }
   }, [card]);
+
+  // Card management
 
   useEffect(() => {
     const fetchCard = async () => {
