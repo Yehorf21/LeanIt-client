@@ -2,7 +2,7 @@
 
 ## Overview
 
-An English learning platform, an English guide for those who want to learn more, or an interesting non-profitable start-up - call it whatever. 
+An English learning platform, an English guide for those who want to learn more, or an interesting non-profitable start-up - the title is up to you. I worked with a talented team of developers from other tech areas to bring this platform to be. Hope you enjoy it! 
 
 ## Table of Contents
 
@@ -19,18 +19,20 @@ An English learning platform, an English guide for those who want to learn more,
 
 ## Features
 
-<!-- to finish later -->
-- [Feature 1: Description of the feature]
-- [Feature 2: Description of the feature]
-- [Feature 3: Description of the feature]
-
+- **Articles**
+  Learners can visit and add to favorites articles of different topics to improve their English or to find out something new.
+- **Profile**
+  Learners can create their own accounts, and change their info on the profile page. Also, they can access and add/remove liked articles in there.
+- **Search**
+  Learners can look up any existing articles on the page
+_ **Flashcards**
+  After every video in the "Video" section, we added 3 flashcards with the most interesting words from the video for learners to remember new vocabulary.
+- **Favorites**
+  Learners can add articles that they like or want to save to their "favorites" which they can view later in their profiles
+  
 ## Technologies Used
 
 - **Frontend**: [React, Vite, TypeScript, TailwindCSS, Redux Toolkit, external libraries]
-- **Backend**: [Java]
-- **Database**: [MySQL, MongoDB, PostgreSQL, etc.]
-- **Design**: [Figma]
-- **Other Tools**: [Power of our immagination]
 
 ## API Documentation
 
